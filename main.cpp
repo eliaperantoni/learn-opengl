@@ -42,14 +42,19 @@ const char *fragmentShaderSource =
         "#version 330 core\n"
         "out vec4 FragColor;\n"
         "void main() {\n"
-        "    FragColor = vec4(1.0f, 0.2f, 0.5f, 1.0f);\n"
+        "    FragColor = vec4(%s);\n"
         "}\n";
 
-unsigned int makeFragmentShader() {
+unsigned int makeFragmentShader(const std::string &color) {
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    char buf[512];
+    std::snprintf(buf, 512, fragmentShaderSource, color.c_str());
+
+    char *buf_ptr = &buf[0];
+
+    glShaderSource(fragmentShader, 1, &buf_ptr, NULL);
     glCompileShader(fragmentShader);
 
     int success;
@@ -64,12 +69,12 @@ unsigned int makeFragmentShader() {
     return fragmentShader;
 }
 
-unsigned int makeShaderProgram() {
+unsigned int makeShaderProgram(const std::string &color) {
     unsigned int shaderProgram;
     shaderProgram = glCreateProgram();
 
     unsigned int vertexShader = makeVertexShader();
-    unsigned int fragmentShader = makeFragmentShader();
+    unsigned int fragmentShader = makeFragmentShader(color);
 
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
@@ -112,7 +117,9 @@ int main() {
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    unsigned int shaderProgram = makeShaderProgram();
+    unsigned int shaderPrograms[2];
+    shaderPrograms[0] = makeShaderProgram("1.0f, 0.2f, 0.5f, 1.0f");
+    shaderPrograms[1] = makeShaderProgram("0.5f, 0.8f, 0.2f, 1.0f");
 
     float vertices[] = {
             0.5f,  0.5f, 0.0f,  // top right
@@ -158,9 +165,14 @@ int main() {
         glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glUseProgram(shaderPrograms[0]);
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void *)0);
+
+        glUseProgram(shaderPrograms[1]);
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void *)(3 * sizeof(unsigned int)));
+
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
@@ -169,7 +181,8 @@ int main() {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shaderProgram);
+    glDeleteProgram(shaderPrograms[0]);
+    glDeleteProgram(shaderPrograms[1]);
 
     glfwTerminate();
     return 0;
