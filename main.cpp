@@ -1,8 +1,10 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <cmath>
 #include <stb_image.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "shader.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -155,6 +157,13 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         shader.use();
+
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0, 0, 1.0));
+
+        unsigned int transLoc = glGetUniformLocation(shader.ID, "trans");
+        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
