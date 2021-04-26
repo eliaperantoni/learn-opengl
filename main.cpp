@@ -1,6 +1,7 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <cmath>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -15,10 +16,8 @@ void processInput(GLFWwindow *window) {
 const char *vertexShaderSource =
         "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;\n"
-        "out vec4 vertexColor;\n"
         "void main() {\n"
         "    gl_Position = vec4(aPos, 1.0);\n"
-        "    vertexColor = vec4(0.1, 0.2, 0.3, 1.0);\n"
         "}\n";
 
 unsigned int makeVertexShader() {
@@ -43,9 +42,9 @@ unsigned int makeVertexShader() {
 const char *fragmentShaderSource =
         "#version 330 core\n"
         "out vec4 FragColor;\n"
-        "in vec4 vertexColor;\n"
+        "uniform vec4 color;\n"
         "void main() {\n"
-        "    FragColor = vec4(vertexColor);\n"
+        "    FragColor = color;\n"
         "}\n";
 
 unsigned int makeFragmentShader() {
@@ -165,7 +164,13 @@ int main() {
         glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        auto colorLoc = glGetUniformLocation(shaderProgram, "color");
+
         glUseProgram(shaderProgram);
+
+        auto green = sin(glfwGetTime()) / 2 + 0.5;
+        glUniform4f(colorLoc, 1.0f, green, 0.2f, 1.0f);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
