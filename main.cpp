@@ -157,16 +157,25 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         shader.use();
-
-        glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-        trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0, 0, 1.0));
-
         unsigned int transLoc = glGetUniformLocation(shader.ID, "trans");
-        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        glm::mat4 trans;
 
         glBindVertexArray(VAO);
+
+        trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0, 0, 1.0));
+        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+        trans = glm::scale(trans, glm::one<glm::vec3>() * (float)(std::sin(glfwGetTime()) * 0.5f + 0.8f));
+        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
         glBindVertexArray(0);
 
         glBindTexture(GL_TEXTURE_2D, 0);
