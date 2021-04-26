@@ -138,13 +138,15 @@ int main() {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 #endif
 
+    shader.use();
+    shader.setInt("texture1", 0);
+    shader.setInt("texture2", 1);
+
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
-        shader.use();
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
@@ -152,8 +154,7 @@ int main() {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
-        shader.setInt("texture1", 0);
-        shader.setInt("texture2", 1);
+        shader.use();
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
