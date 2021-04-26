@@ -82,6 +82,8 @@ int main() {
         auto green = sin(glfwGetTime()) / 2 + 0.5;
         glUniform4f(colorLoc, 1.0f, green, 0.2f, 1.0f);
 
+        shader.setFloat("offset", 0.5f);
+
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
