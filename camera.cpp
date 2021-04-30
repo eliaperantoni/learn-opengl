@@ -92,6 +92,7 @@ glm::mat4 lookAt(glm::vec3 pos, glm::vec3 target, glm::vec3 world_up) {
         glm::vec4(-front, 0.0f),
         glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
     };
+    // We actually want to invert the matrix but since 'rotation' is an orthonormal matrix that is the same as transposing
     rotation = glm::transpose(rotation);
 
     glm::mat4 translation = glm::mat4(1.0f);
