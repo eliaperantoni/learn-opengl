@@ -205,8 +205,16 @@ int main() {
         for (unsigned int i = 0; i < 10; i++) {
             glm::mat4 model = glm::mat4(1);
             model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, (float) glfwGetTime() * glm::radians(50.0f) + glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+            if(i % 3 == 0) {
+                float angle = 20.0f * i;
+                model = glm::rotate(model, (float) glfwGetTime() * glm::radians(50.0f) + glm::radians(angle),
+                                    glm::vec3(1.0f, 0.3f, 0.5f));
+            } else {
+                model = glm::rotate(model, glm::radians(50.0f),
+                                    glm::vec3(1.0f, 0.3f, 0.5f));
+            }
+            
             glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
