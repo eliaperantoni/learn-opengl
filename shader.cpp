@@ -1,6 +1,8 @@
 #include <glad/glad.h>
 #include <fstream>
 #include <sstream>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "shader.hpp"
 
 Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath) {
@@ -27,8 +29,8 @@ Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath) {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
 
-    const char* vertexSourcePtr = vertexSource.c_str();
-    const char* fragmentSourcePtr = fragmentSource.c_str();
+    const char *vertexSourcePtr = vertexSource.c_str();
+    const char *fragmentSourcePtr = fragmentSource.c_str();
 
     unsigned int vertexID, fragmentID;
     int success;
@@ -87,4 +89,8 @@ void Shader::setInt(const std::string &name, int value) const {
 
 void Shader::setFloat(const std::string &name, float value) const {
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+}
+
+void Shader::setMat4(const std::string &name, glm::mat4 value) const {
+    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }

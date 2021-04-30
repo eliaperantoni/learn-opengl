@@ -6,58 +6,59 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "shader.hpp"
+#include "camera.hpp"
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
+// settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
 
 float deltaTime;
 float lastFrame;
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
 
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
 
-    const float cameraSpeed = 2.5f * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
+        camera.ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
+        camera.ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
+        camera.ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
+        camera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
 }
 
-float lastx = 400, lasty = 300;
-float yaw = -90.0f, pitch;
+void mouse_callback(GLFWwindow *window, double pos_x, double pos_y) {
+    if (firstMouse) {
+        lastX = pos_x;
+        lastY = pos_y;
+        firstMouse = false;
+    }
 
-void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
-    float deltax = xpos - lastx;
-    float deltay = ypos - lasty;
-    deltay *= -1;
+    float offset_x = pos_x - lastX;
+    float offset_y = pos_y - lastY;
+    offset_y *= -1;
 
-    lastx = xpos;
-    lasty = ypos;
+    lastX = pos_x;
+    lastY = pos_y;
 
-    float sensitivity = 0.1f;
-    yaw += sensitivity * deltax;
-    pitch += sensitivity * deltay;
+    camera.ProcessMouseMovement(offset_x, offset_y);
+}
 
-    if (pitch > 89.0f) pitch = 89.0f;
-    else if (pitch < -89.0f) pitch = -89.0f;
-
-    glm::vec3 direction;
-    direction.x = std::cos(glm::radians(yaw)) * std::cos(glm::radians(pitch));
-    direction.y = std::sin(glm::radians(pitch));
-    direction.z = std::sin(glm::radians(yaw)) * std::cos(glm::radians(pitch));
-
-    cameraFront = glm::normalize(direction);
+void scroll_callback(GLFWwindow *window, double delta_x, double delta_y) {
+    camera.ProcessMouseScroll((float) delta_y);
 }
 
 int main() {
@@ -66,7 +67,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -80,9 +81,11 @@ int main() {
     }
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, mouse_callback);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
 
     stbi_set_flip_vertically_on_load(true);
 
@@ -242,11 +245,9 @@ int main() {
 
         shader.use();
 
-        glm::mat4 view = glm::mat4(1);
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        shader.setMat4("view", camera.GetViewMatrix());
 
-        glm::mat4 project = glm::perspective(glm::radians(56.0f), 800.0f/600.0f, 0.1f, 100.0f);
+        glm::mat4 project = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "project"), 1, GL_FALSE, glm::value_ptr(project));
 
         glBindVertexArray(VAO);
