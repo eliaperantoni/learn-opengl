@@ -28,14 +28,17 @@ glm::mat4 Camera::GetViewMatrix() {
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
     float velocity = MovementSpeed * deltaTime;
+
+    glm::vec3 frontPlane = glm::normalize(glm::vec3(Front.x, 0.0f, Front.z));
+
     if (direction == FORWARD)
-        Position += Front * velocity;
+        Position += frontPlane * velocity;
     if (direction == BACKWARD)
-        Position -= Front * velocity;
+        Position -= frontPlane * velocity;
     if (direction == LEFT)
-        Position -= Right * velocity;
+        Position -= glm::normalize(glm::cross(frontPlane, Up)) * velocity;
     if (direction == RIGHT)
-        Position += Right * velocity;
+        Position += glm::normalize(glm::cross(frontPlane, Up)) * velocity;
 }
 
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch) {
