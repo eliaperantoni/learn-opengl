@@ -3,6 +3,8 @@
 
 #include "camera.hpp"
 
+glm::mat4 lookAt(glm::vec3 pos, glm::vec3 target, glm::vec3 up);
+
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)),
                                                                            MovementSpeed(SPEED),
                                                                            MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
@@ -23,7 +25,7 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
 }
 
 glm::mat4 Camera::GetViewMatrix() {
-    return glm::lookAt(Position, Position + Front, Up);
+    return lookAt(Position, Position + Front, Up);
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
@@ -42,7 +44,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
     xoffset *= MouseSensitivity;
     yoffset *= MouseSensitivity;
 
-    Yaw += xoffset;
+    Yaw -= xoffset;
     Pitch += yoffset;
 
     // make sure that when pitch is out of bounds, screen doesn't get flipped
@@ -70,10 +72,30 @@ void Camera::updateCameraVectors() {
     glm::vec3 front;
     front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     front.y = sin(glm::radians(Pitch));
-    front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    front.z = -sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     Front = glm::normalize(front);
     // also re-calculate the Right and Up vector
     Right = glm::normalize(glm::cross(Front,
                                       WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
     Up = glm::normalize(glm::cross(Right, Front));
+}
+
+glm::mat4 lookAt(glm::vec3 pos, glm::vec3 target, glm::vec3 world_up) {
+    // This holds true because [target = pos + front]
+    glm::vec3 front = glm::normalize(target - pos);
+    glm::vec3 right = glm::normalize(glm::cross(front, world_up));
+    glm::vec3 up    = glm::normalize(glm::cross(right, front));
+
+    glm::mat4 rotation {
+        glm::vec4(right, 0.0f),
+        glm::vec4(up, 0.0f),
+        glm::vec4(-front, 0.0f),
+        glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+    };
+    rotation = glm::transpose(rotation);
+
+    glm::mat4 translation = glm::mat4(1.0f);
+    translation = glm::translate(translation, -pos);
+
+    return rotation * translation;
 }
