@@ -252,6 +252,22 @@ int main() {
 
         // -------------------------------------------------------------------------------------------------------------
 
+        lightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        lightingShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+
+        lightingShader.setFloat("spotLight.constant", 1.0f);
+        lightingShader.setFloat("spotLight.linear", 0.09f);
+        lightingShader.setFloat("spotLight.quadratic", 0.032f);
+
+        lightingShader.setVec3("spotLight.diffuse", glm::vec3(1.0f));
+        lightingShader.setVec3("spotLight.specular", glm::vec3(1.0f));
+        lightingShader.setVec3("spotLight.ambient", glm::vec3(0.0f));
+
+        lightingShader.setVec3("spotLight.position", camera.Position);
+        lightingShader.setVec3("spotLight.direction", camera.Front);
+
+        // -------------------------------------------------------------------------------------------------------------
+
         for (unsigned int i = 0; i < 4; i++) {
             lightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i]);
 
