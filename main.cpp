@@ -100,6 +100,7 @@ int main() {
 
     unsigned int diffuseTexture = loadTexture("container2.png");
     unsigned int specularTexture = loadTexture("container2_specular.png");
+    unsigned int emissionTexture = loadTexture("matrix.jpg");
 
     Shader lightingShader    ("shaders/lighting/shader.vs",     "shaders/lighting/shader.fs");
     Shader lightSourceShader ("shaders/light_source/shader.vs", "shaders/light_source/shader.fs");
@@ -215,6 +216,10 @@ int main() {
         lightingShader.setInt("material.specular", 1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularTexture);
+
+        lightingShader.setInt("material.emission", 2);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, emissionTexture);
 
         lightingShader.setFloat("material.shininess", 32.0f);
 
