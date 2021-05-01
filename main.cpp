@@ -99,7 +99,7 @@ int main() {
     stbi_set_flip_vertically_on_load(true);
 
     unsigned int diffuseTexture = loadTexture("container2.png");
-    unsigned int specularTexture = loadTexture("container2_specular.png");
+    unsigned int specularTexture = loadTexture("lighting_maps_specular_color.png");
 
     Shader lightingShader    ("shaders/lighting/shader.vs",     "shaders/lighting/shader.fs");
     Shader lightSourceShader ("shaders/light_source/shader.vs", "shaders/light_source/shader.fs");
