@@ -220,10 +220,14 @@ int main() {
 
         processInput(window);
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.95f, 0.95f, 0.95f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        auto green = glm::vec3(0.1f, 1.0f, 0.1f);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -271,8 +275,8 @@ int main() {
         for (unsigned int i = 0; i < 4; i++) {
             lightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i]);
 
-            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", glm::vec3(0.8f));
-            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].specular", glm::vec3(1.0f));
+            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", 0.4f * green);
+            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].specular", 1.0f * green);
             lightingShader.setVec3("pointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.05f));
 
             lightingShader.setFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
