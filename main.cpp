@@ -198,8 +198,8 @@ int main() {
         lightingShader.setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
         lightingShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
-        lightingShader.setVec3("lightPos", lightPos);
-        lightingShader.setVec3("viewPos", camera.Position);
+        lightingShader.setVec3("lightPos", glm::vec3(camera.GetViewMatrix() * glm::vec4(lightPos, 1.0f)));
+        lightingShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 0.0f));
 
         {
             glm::mat4 model = glm::mat4(1);
