@@ -8,6 +8,8 @@
 #include "shader.hpp"
 #include "camera.hpp"
 
+unsigned int loadTexture(const std::string &path);
+
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -96,30 +98,8 @@ int main() {
 
     stbi_set_flip_vertically_on_load(true);
 
-    unsigned int texture;
-    {
-        glGenTextures(1, &texture);
-
-        glBindTexture(GL_TEXTURE_2D, texture);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        int width, height, nrChannels;
-        unsigned char *data = stbi_load("container2.png", &width, &height, &nrChannels, 0);
-
-        if (data) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-        } else {
-            std::cout << "ERROR::TEXTURE::LOAD_FAILED\n" << std::endl;
-        }
-
-        glBindTexture(GL_TEXTURE_2D, 0);
-        stbi_image_free(data);
-    }
+    unsigned int diffuseTexture = loadTexture("container2.png");
+    unsigned int specularTexture = loadTexture("container2_specular.png");
 
     Shader lightingShader    ("shaders/lighting/shader.vs",     "shaders/lighting/shader.fs");
     Shader lightSourceShader ("shaders/light_source/shader.vs", "shaders/light_source/shader.fs");
@@ -230,9 +210,12 @@ int main() {
 
         lightingShader.setInt("material.diffuse", 0);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_2D, diffuseTexture);
 
-        lightingShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+        lightingShader.setInt("material.specular", 1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specularTexture);
+
         lightingShader.setFloat("material.shininess", 32.0f);
 
         lightingShader.setVec3("light.ambient", glm::vec3(0.2f));
@@ -278,4 +261,40 @@ int main() {
 
     glfwTerminate();
     return 0;
+}
+
+unsigned int loadTexture(const std::string &path) {
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+
+    GLint format;
+    switch (nrChannels) {
+        case 3:
+            format = GL_RGB;
+            break;
+        case 4:
+            format = GL_RGBA;
+            break;
+    }
+
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        std::cout << "ERROR::TEXTURE::LOAD_FAILED\n" << std::endl;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    stbi_image_free(data);
+
+    return texture;
 }
