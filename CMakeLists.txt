@@ -9,6 +9,7 @@ add_executable(learn_opengl
     main.cpp
     shader.cpp
     camera.cpp
+    mesh.cpp
     ext/src/glad.c
 )
 
