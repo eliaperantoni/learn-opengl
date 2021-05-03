@@ -22,8 +22,11 @@ bool firstMouse = true;
 float deltaTime;
 float lastFrame;
 
+float screenRatio = (float) SCR_WIDTH / (float) SCR_HEIGHT;
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glViewport(0, 0, width, height);
+    screenRatio = (float) width / (float) height;
 }
 
 void processInput(GLFWwindow *window) {
@@ -85,7 +88,7 @@ int main() {
         return -1;
     }
 
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
@@ -113,15 +116,17 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 0.1f, 100.0f);
 
         // -------------------------------------------------------------------------------------------------------------
 
         lightingShader.use();
 
-        lightingShader.setVec3("dirLight.diffuse", glm::vec3(0.4f));
-        lightingShader.setVec3("dirLight.specular", glm::vec3(0.5f));
-        lightingShader.setVec3("dirLight.ambient", glm::vec3(0.05f));
+        lightingShader.setFloat("material.shininess", 32.0f);
+
+        lightingShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
+        lightingShader.setVec3("dirLight.specular", glm::vec3(1.0f));
+        lightingShader.setVec3("dirLight.ambient", glm::vec3(0.2f));
 
         lightingShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
 
