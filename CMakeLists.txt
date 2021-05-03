@@ -10,17 +10,23 @@ add_executable(learn_opengl
     shader.cpp
     camera.cpp
     mesh.cpp
+    model.cpp
     ext/src/glad.c
 )
 
 # Get full path to ext/lib/libglfw3.a
 find_library(GLFW3_LIB glfw3 ext/lib)
 
-# Link libraries from OS and GLFW
-target_link_libraries(learn_opengl LINK_PRIVATE -lGL -lX11 -lpthread -lXrandr -lXi -ldl ${GLFW3_LIB})
+# Get full path to ext/lib/libassimp.a
+find_library(ASSIMP_LIB assimp ext/lib)
 
-target_compile_definitions(learn_opengl PRIVATE STB_IMAGE_IMPLEMENTATION=1)
+# Link libraries
+target_link_libraries(learn_opengl LINK_PUBLIC -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lz)
+target_link_libraries(learn_opengl LINK_PUBLIC ${GLFW3_LIB})
+target_link_libraries(learn_opengl LINK_PUBLIC ${ASSIMP_LIB})
+
+target_compile_definitions(learn_opengl PUBLIC STB_IMAGE_IMPLEMENTATION=1)
 
 if (WIREFRAME)
-    target_compile_definitions(learn_opengl PRIVATE WIREFRAME=1)
+    target_compile_definitions(learn_opengl PUBLIC WIREFRAME=1)
 endif (WIREFRAME)

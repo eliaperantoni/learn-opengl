@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <glm/glm.hpp>
 #include "shader.hpp"
@@ -11,6 +13,7 @@ struct Vertex {
 struct Texture {
     unsigned int id;
     std::string type;
+    std::string path;
 };
 
 class Mesh {
