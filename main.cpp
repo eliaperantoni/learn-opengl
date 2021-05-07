@@ -117,7 +117,7 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 1.0f, 100.0f);
 
         // -------------------------------------------------------------------------------------------------------------
 
