@@ -99,7 +99,8 @@ int main() {
     Shader lightingShader    ("shaders/lighting/shader.vs",     "shaders/lighting/shader.fs");
     Shader lightSourceShader ("shaders/light_source/shader.vs", "shaders/light_source/shader.fs");
 
-    Model model ("backpack/backpack.obj");
+    Model cube ("models/cube.obj");
+    Model plane ("models/plane.obj");
 
 #ifdef WIREFRAME
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -132,11 +133,20 @@ int main() {
 
         lightingShader.setVec3("viewPos", camera.Position);
 
-        lightingShader.setMat4("model", glm::mat4(1.0f));
         lightingShader.setMat4("view", camera.GetViewMatrix());
         lightingShader.setMat4("projection", projection);
 
-        model.Draw(lightingShader);
+        glm::mat4 model;
+
+        model = glm::mat4(1.0f);
+        lightingShader.setMat4("model", model);
+        cube.Draw(lightingShader);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(4.0f));
+        lightingShader.setMat4("model", model);
+        plane.Draw(lightingShader);
 
         // -------------------------------------------------------------------------------------------------------------
 
