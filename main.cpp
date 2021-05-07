@@ -96,7 +96,7 @@ int main() {
 
     glEnable(GL_DEPTH_TEST);
 
-    Shader lightingShader    ("shaders/lighting/shader.vs",     "shaders/lighting/shader.fs");
+    Shader depthShader    ("shaders/depth/shader.vs", "shaders/depth/shader.fs");
     Shader lightSourceShader ("shaders/light_source/shader.vs", "shaders/light_source/shader.fs");
 
     Model cube ("models/cube.obj");
@@ -117,36 +117,36 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 1.0f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 0.1f, 100.0f);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        lightingShader.use();
+        depthShader.use();
 
-        lightingShader.setFloat("material.shininess", 32.0f);
+        depthShader.setFloat("material.shininess", 32.0f);
 
-        lightingShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
-        lightingShader.setVec3("dirLight.specular", glm::vec3(1.0f));
-        lightingShader.setVec3("dirLight.ambient", glm::vec3(0.2f));
+        depthShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
+        depthShader.setVec3("dirLight.specular", glm::vec3(1.0f));
+        depthShader.setVec3("dirLight.ambient", glm::vec3(0.2f));
 
-        lightingShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+        depthShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
 
-        lightingShader.setVec3("viewPos", camera.Position);
+        depthShader.setVec3("viewPos", camera.Position);
 
-        lightingShader.setMat4("view", camera.GetViewMatrix());
-        lightingShader.setMat4("projection", projection);
+        depthShader.setMat4("view", camera.GetViewMatrix());
+        depthShader.setMat4("projection", projection);
 
         glm::mat4 model;
 
         model = glm::mat4(1.0f);
-        lightingShader.setMat4("model", model);
-        cube.Draw(lightingShader);
+        depthShader.setMat4("model", model);
+        cube.Draw(depthShader);
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(4.0f));
-        lightingShader.setMat4("model", model);
-        plane.Draw(lightingShader);
+        depthShader.setMat4("model", model);
+        plane.Draw(depthShader);
 
         // -------------------------------------------------------------------------------------------------------------
 
