@@ -120,7 +120,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glEnable(GL_CULL_FACE);
-        glFrontFace(GL_CCW); // Not really necessary, it's the default
+        glFrontFace(GL_CW);
         glCullFace(GL_BACK); // Not really necessary, it's the default
 
         unlitShader.use();
