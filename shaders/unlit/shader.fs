@@ -9,10 +9,13 @@ struct Material {
 };
 uniform Material material;
 
-uniform sampler2D sampler;
-
 out vec4 FragColor;
 
 void main() {
-    FragColor = texture(material.texture_diffuse1, TexCoords);
+    vec4 color = texture(material.texture_diffuse1, TexCoords);
+    if(color.a < 0.1) {
+        discard;
+    }
+
+    FragColor = color;
 }

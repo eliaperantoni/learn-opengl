@@ -125,7 +125,8 @@ unsigned int TextureFromFile(const char *path, const std::string &directory) {
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
-    stbi_set_flip_vertically_on_load(true);
+    // Had to disable this for some reason
+    // stbi_set_flip_vertically_on_load(true);
 
     int width, height, nrComponents;
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);

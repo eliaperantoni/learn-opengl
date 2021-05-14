@@ -94,11 +94,12 @@ int main() {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    Shader blendShader("shaders/blend/shader.vs", "shaders/blend/shader.fs");
+    Shader unlitShader("shaders/unlit/shader.vs", "shaders/unlit/shader.fs");
     Shader lightSourceShader("shaders/light_source/shader.vs", "shaders/light_source/shader.fs");
 
     Model cube ("models/cube/cube.obj");
     Model plane ("models/plane/plane.obj");
+    Model grass ("models/grass/grass.obj");
 
 #ifdef WIREFRAME
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -119,12 +120,11 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        blendShader.use();
-
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 0.1f, 100.0f);
-        blendShader.setMat4("projection", projection);
 
-        blendShader.setMat4("view", camera.GetViewMatrix());
+        unlitShader.use();
+        unlitShader.setMat4("projection", projection);
+        unlitShader.setMat4("view", camera.GetViewMatrix());
 
         glm::mat4 model;
 
@@ -133,14 +133,21 @@ int main() {
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -1.01f, 0.0f));
         model = glm::scale(model, glm::vec3(4.0f));
-        blendShader.setMat4("model", model);
-        plane.Draw(blendShader);
+        unlitShader.setMat4("model", model);
+        plane.Draw(unlitShader);
 
         // -------------------------------------------------------------------------------------------------------------
 
         model = glm::mat4(1.0f);
-        blendShader.setMat4("model", model);
-        cube.Draw(blendShader);
+        unlitShader.setMat4("model", model);
+        cube.Draw(unlitShader);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
+        unlitShader.setMat4("model", model);
+        grass.Draw(unlitShader);
 
         // -------------------------------------------------------------------------------------------------------------
 
