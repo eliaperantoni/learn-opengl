@@ -98,8 +98,8 @@ int main() {
     Shader monochromaShader("shaders/monochroma/shader.vs", "shaders/monochroma/shader.fs");
     Shader lightSourceShader("shaders/light_source/shader.vs", "shaders/light_source/shader.fs");
 
-    Model cube ("models/cube.obj");
-    Model plane ("models/plane.obj");
+    Model cube ("models/cube/cube.obj");
+    Model plane ("models/plane/plane.obj");
 
 #ifdef WIREFRAME
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
