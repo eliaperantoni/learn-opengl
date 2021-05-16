@@ -24,8 +24,14 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
     updateCameraVectors();
 }
 
-glm::mat4 Camera::GetViewMatrix() {
-    return lookAt(Position, Position + Front, Up);
+glm::mat4 Camera::GetViewMatrix(bool lookBack) {
+    glm::vec3 target;
+    if (lookBack) {
+        target = Position - Front;
+    } else {
+        target = Position + Front;
+    }
+    return lookAt(Position, target, Up);
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {

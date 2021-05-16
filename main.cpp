@@ -132,13 +132,13 @@ int main() {
 
     float ppPlaneVertices[] = {
             // positions   // texCoords
-            -1.0f,  1.0f,  0.0f, 1.0f,
-            -1.0f, -1.0f,  0.0f, 0.0f,
-            1.0f, -1.0f,  1.0f, 0.0f,
+            -0.4f,  0.95f,  0.0f, 1.0f, // top left
+            -0.4f, 0.6f,  0.0f, 0.0f, // bottom left
+            0.4f, 0.6f,  1.0f, 0.0f, // bottom right
 
-            -1.0f,  1.0f,  0.0f, 1.0f,
-            1.0f, -1.0f,  1.0f, 0.0f,
-            1.0f,  1.0f,  1.0f, 1.0f
+            -0.4f,  0.95f,  0.0f, 1.0f, // top left
+            0.4f, 0.6f,  1.0f, 0.0f, // bottom right
+            0.4f,  0.95f,  1.0f, 1.0f // top right
     };
 
     unsigned int ppVAO;
@@ -169,6 +169,8 @@ int main() {
 
     // -----------------------------------------------------------------------------------------------------------------
 
+    glEnable(GL_CULL_FACE);
+
     while (!glfwWindowShouldClose(window)) {
         deltaTime = glfwGetTime() - lastFrame;
         lastFrame = glfwGetTime();
@@ -177,45 +179,46 @@ int main() {
 
         // -------------------------------------------------------------------------------------------------------------
 
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
+
+        for(int i = 0;i<2;i++) {
+
+            if (i == 0) {
+                glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+            } else {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // -------------------------------------------------------------------------------------------------------------
+
+            unlitShader.use();
+
+            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 0.1f, 100.0f);
+            unlitShader.setMat4("projection", projection);
+
+            unlitShader.setMat4("view", camera.GetViewMatrix(i == 0));
+
+            glm::mat4 model;
+
+            // -------------------------------------------------------------------------------------------------------------
+
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(0.0f, -1.01f, 0.0f));
+            model = glm::scale(model, glm::vec3(4.0f));
+            unlitShader.setMat4("model", model);
+            plane.Draw(unlitShader);
+
+            // -------------------------------------------------------------------------------------------------------------
+
+            model = glm::mat4(1.0f);
+            unlitShader.setMat4("model", model);
+            cube.Draw(unlitShader);
+        }
 
         // -------------------------------------------------------------------------------------------------------------
-
-        unlitShader.use();
-
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 0.1f, 100.0f);
-        unlitShader.setMat4("projection", projection);
-
-        unlitShader.setMat4("view", camera.GetViewMatrix());
-
-        glm::mat4 model;
-
-        // -------------------------------------------------------------------------------------------------------------
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -1.01f, 0.0f));
-        model = glm::scale(model, glm::vec3(4.0f));
-        unlitShader.setMat4("model", model);
-        plane.Draw(unlitShader);
-
-        // -------------------------------------------------------------------------------------------------------------
-
-        model = glm::mat4(1.0f);
-        unlitShader.setMat4("model", model);
-        cube.Draw(unlitShader);
-
-        // -------------------------------------------------------------------------------------------------------------
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
 
         glDisable(GL_DEPTH_TEST);
 
