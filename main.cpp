@@ -170,11 +170,12 @@ int main() {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    Shader unlitShader("shaders/unlit/shader.vs", "shaders/unlit/shader.fs");
+    Shader emapShader("shaders/emap/shader.vs", "shaders/emap/shader.fs");
     Shader skyboxShader("shaders/skybox/shader.vs", "shaders/skybox/shader.fs");
 
     Model cube ("models/cube/cube.obj");
     Model plane ("models/plane/plane.obj");
+    Model bpack ("models/backpack/backpack.obj");
 
     unsigned int skyboxVAO;
     glGenVertexArrays(1, &skyboxVAO);
@@ -231,32 +232,25 @@ int main() {
 
         // -------------------------------------------------------------------------------------------------------------
 
+        glm::mat4 model;
         glm::mat4 projection;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        unlitShader.use();
+        emapShader.use();
 
         projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 0.1f, 100.0f);
-        unlitShader.setMat4("projection", projection);
+        emapShader.setMat4("projection", projection);
 
-        unlitShader.setMat4("view", camera.GetViewMatrix());
+        emapShader.setMat4("view", camera.GetViewMatrix());
 
-        glm::mat4 model;
-
-        // -------------------------------------------------------------------------------------------------------------
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -1.01f, 0.0f));
-        model = glm::scale(model, glm::vec3(4.0f));
-        unlitShader.setMat4("model", model);
-        plane.Draw(unlitShader);
+        emapShader.setVec3("cameraPos", camera.Position);
 
         // -------------------------------------------------------------------------------------------------------------
 
         model = glm::mat4(1.0f);
-        unlitShader.setMat4("model", model);
-        cube.Draw(unlitShader);
+        emapShader.setMat4("model", model);
+        bpack.Draw(emapShader);
 
         // -------------------------------------------------------------------------------------------------------------
 
