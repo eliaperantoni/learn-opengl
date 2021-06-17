@@ -7,6 +7,9 @@
 #include "camera.hpp"
 #include "model.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 unsigned int loadTexture(const std::string &path);
 
 // settings
@@ -69,6 +72,79 @@ void scroll_callback(GLFWwindow *window, double delta_x, double delta_y) {
     camera.ProcessMouseScroll((float) delta_y);
 }
 
+unsigned int load_skybox(const std::vector<std::string> &paths) {
+    unsigned int texId;
+    glGenTextures(1, &texId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texId);
+
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < paths.size(); i++) {
+        stbi_set_flip_vertically_on_load(false);
+        unsigned char *data = stbi_load(paths[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            stbi_image_free(data);
+        } else {
+            std::cout << "Failed to load cubemap texture: " << paths[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    return texId;
+}
+
+float skyboxVertices[] = {
+        // positions
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+        1.0f,  1.0f, -1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+        1.0f, -1.0f,  1.0f
+};
+
 int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -95,9 +171,39 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
 
     Shader unlitShader("shaders/unlit/shader.vs", "shaders/unlit/shader.fs");
+    Shader skyboxShader("shaders/skybox/shader.vs", "shaders/skybox/shader.fs");
 
     Model cube ("models/cube/cube.obj");
     Model plane ("models/plane/plane.obj");
+
+    unsigned int skyboxVAO;
+    glGenVertexArrays(1, &skyboxVAO);
+
+    glBindVertexArray(skyboxVAO);
+
+    unsigned int skyboxVBO;
+    glGenBuffers(1, &skyboxVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindVertexArray(0);
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    auto skyboxTex = load_skybox(std::vector<std::string>{
+            "textures/skybox/right.jpg",
+            "textures/skybox/left.jpg",
+            "textures/skybox/top.jpg",
+            "textures/skybox/bottom.jpg",
+            "textures/skybox/front.jpg",
+            "textures/skybox/back.jpg"
+    });
 
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -121,11 +227,17 @@ int main() {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
 
+        glDepthFunc(GL_LEQUAL);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        glm::mat4 projection;
+
         // -------------------------------------------------------------------------------------------------------------
 
         unlitShader.use();
 
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 0.1f, 100.0f);
         unlitShader.setMat4("projection", projection);
 
         unlitShader.setMat4("view", camera.GetViewMatrix());
@@ -145,6 +257,22 @@ int main() {
         model = glm::mat4(1.0f);
         unlitShader.setMat4("model", model);
         cube.Draw(unlitShader);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        skyboxShader.use();
+
+        projection = glm::perspective(glm::radians(camera.Zoom), screenRatio, 0.1f, 100.0f);
+        skyboxShader.setMat4("projection", projection);
+
+        glm::mat4 view = camera.GetViewMatrix();
+        view = glm::mat4(glm::mat3(view));
+        skyboxShader.setMat4("view", view);
+
+        glBindVertexArray(skyboxVAO);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // -------------------------------------------------------------------------------------------------------------
 

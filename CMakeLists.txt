@@ -25,8 +25,6 @@ target_link_libraries(learn_opengl LINK_PUBLIC -lGL -lX11 -lpthread -lXrandr -lX
 target_link_libraries(learn_opengl LINK_PUBLIC ${GLFW3_LIB})
 target_link_libraries(learn_opengl LINK_PUBLIC ${ASSIMP_LIB})
 
-target_compile_definitions(learn_opengl PUBLIC STB_IMAGE_IMPLEMENTATION=1)
-
 if (WIREFRAME)
     target_compile_definitions(learn_opengl PUBLIC WIREFRAME=1)
 endif (WIREFRAME)
