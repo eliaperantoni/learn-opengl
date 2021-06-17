@@ -95,71 +95,9 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
 
     Shader unlitShader("shaders/unlit/shader.vs", "shaders/unlit/shader.fs");
-    Shader ppShader("shaders/post_processing/shader.vs", "shaders/post_processing/shader.fs");
 
     Model cube ("models/cube/cube.obj");
     Model plane ("models/plane/plane.obj");
-
-    // -----------------------------------------------------------------------------------------------------------------
-
-    unsigned int fbo;
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    unsigned int fboColor;
-    glGenTextures(1, &fboColor);
-    glBindTexture(GL_TEXTURE_2D, fboColor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboColor, 0);
-
-    unsigned fboDepthStencil;
-    glGenRenderbuffers(1, &fboDepthStencil);
-    glBindRenderbuffer(GL_RENDERBUFFER, fboDepthStencil);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fboDepthStencil);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    float ppPlaneVertices[] = {
-            // positions   // texCoords
-            -1.0f,  1.0f,  0.0f, 1.0f,
-            -1.0f, -1.0f,  0.0f, 0.0f,
-            1.0f, -1.0f,  1.0f, 0.0f,
-
-            -1.0f,  1.0f,  0.0f, 1.0f,
-            1.0f, -1.0f,  1.0f, 0.0f,
-            1.0f,  1.0f,  1.0f, 1.0f
-    };
-
-    unsigned int ppVAO;
-    glGenVertexArrays(1, &ppVAO);
-    glBindVertexArray(ppVAO);
-
-    unsigned int ppVBO;
-    glGenBuffers(1, &ppVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, ppVBO);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(ppPlaneVertices), ppPlaneVertices, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*) 0);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*) (2 * sizeof(float)));
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(0);
 
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -176,8 +114,6 @@ int main() {
         processInput(window);
 
         // -------------------------------------------------------------------------------------------------------------
-
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -209,21 +145,6 @@ int main() {
         model = glm::mat4(1.0f);
         unlitShader.setMat4("model", model);
         cube.Draw(unlitShader);
-
-        // -------------------------------------------------------------------------------------------------------------
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glDisable(GL_DEPTH_TEST);
-
-        ppShader.use();
-
-        glBindVertexArray(ppVAO);
-        glBindTexture(GL_TEXTURE_2D, fboColor);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // -------------------------------------------------------------------------------------------------------------
 
