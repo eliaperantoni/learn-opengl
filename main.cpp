@@ -95,10 +95,15 @@ int main() {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
+    Shader unlitShader(
+            "shaders/unlit/shader.vs",
+            "shaders/unlit/shader.fs"
+    );
+
     Shader geoShader(
-            "shaders/geometry_explode/shader.vs",
-            "shaders/geometry_explode/shader.fs",
-            "shaders/geometry_explode/shader.gs"
+            "shaders/geometry_debugnormals/shader.vs",
+            "shaders/geometry_debugnormals/shader.fs",
+            "shaders/geometry_debugnormals/shader.gs"
     );
 
     Model bpack ("models/backpack/backpack.obj");
@@ -136,18 +141,24 @@ int main() {
 
         // -------------------------------------------------------------------------------------------------------------
 
-        geoShader.use();
-        geoShader.setMat4("projection", projection);
-        geoShader.setMat4("view", view);
-
-        // -------------------------------------------------------------------------------------------------------------
-
-        geoShader.setFloat("time", glfwGetTime());
-
-        // -------------------------------------------------------------------------------------------------------------
-
         model = glm::mat4(1.0f);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        unlitShader.use();
+        unlitShader.setMat4("model", model);
+        unlitShader.setMat4("view", view);
+        unlitShader.setMat4("projection", projection);
+
+        bpack.Draw(unlitShader);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        geoShader.use();
         geoShader.setMat4("model", model);
+        geoShader.setMat4("view", view);
+        geoShader.setMat4("projection", projection);
+
         bpack.Draw(geoShader);
 
         // -------------------------------------------------------------------------------------------------------------
