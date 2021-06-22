@@ -5,26 +5,45 @@
 
 #include "shader.hpp"
 
-Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath) {
-    std::string vertexSource, fragmentSource;
-    std::ifstream vertexFS, fragmentFS;
+Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath, const std::string &geometryPath) {
+    auto hasGeometry = geometryPath.length() > 0;
+
+    std::string vertexSource, fragmentSource, geometrySource;
+    std::ifstream vertexFS, fragmentFS, geometryFS;
 
     vertexFS.exceptions(std::fstream::failbit | std::fstream::badbit);
     fragmentFS.exceptions(std::fstream::failbit | std::fstream::badbit);
+    geometryFS.exceptions(std::fstream::failbit | std::fstream::badbit);
 
     try {
         vertexFS.open(vertexPath);
         fragmentFS.open(fragmentPath);
 
-        std::stringstream vertexSS, fragmentSS;
+        if (hasGeometry) {
+            geometryFS.open(geometryPath);
+        }
+
+        std::stringstream vertexSS, fragmentSS, geometrySS;
         vertexSS << vertexFS.rdbuf();
         fragmentSS << fragmentFS.rdbuf();
+
+        if (hasGeometry) {
+            geometrySS << geometryFS.rdbuf();
+        }
 
         vertexFS.close();
         fragmentFS.close();
 
+        if (hasGeometry) {
+            geometryFS.close();
+        }
+
         vertexSource = vertexSS.str();
         fragmentSource = fragmentSS.str();
+
+        if (hasGeometry) {
+            geometrySource = geometrySS.str();
+        }
     } catch (const std::ifstream::failure &e) {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
@@ -32,15 +51,28 @@ Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath) {
     const char *vertexSourcePtr = vertexSource.c_str();
     const char *fragmentSourcePtr = fragmentSource.c_str();
 
-    unsigned int vertexID, fragmentID;
+    const char *geometrySourcePtr;
+    if (hasGeometry) {
+        geometrySourcePtr = geometrySource.c_str();
+    }
+
+    unsigned int vertexID, fragmentID, geometryID;
     int success;
     char infoLog[512];
 
     vertexID = glCreateShader(GL_VERTEX_SHADER);
     fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
 
+    if (hasGeometry) {
+        geometryID = glCreateShader(GL_GEOMETRY_SHADER);
+    }
+
     glShaderSource(vertexID, 1, &vertexSourcePtr, NULL);
     glShaderSource(fragmentID, 1, &fragmentSourcePtr, NULL);
+
+    if (hasGeometry) {
+        glShaderSource(geometryID, 1, &geometrySourcePtr, NULL);
+    }
 
     glCompileShader(vertexID);
     glGetShaderiv(vertexID, GL_COMPILE_STATUS, &success);
@@ -56,9 +88,22 @@ Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath) {
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
+    if (hasGeometry) {
+        glCompileShader(geometryID);
+        glGetShaderiv(geometryID, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            glGetShaderInfoLog(geometryID, 512, NULL, infoLog);
+            std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
+        }
+    }
+
     ID = glCreateProgram();
     glAttachShader(ID, vertexID);
     glAttachShader(ID, fragmentID);
+
+    if (hasGeometry) {
+        glAttachShader(ID, geometryID);
+    }
 
     glLinkProgram(ID);
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
