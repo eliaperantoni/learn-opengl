@@ -25,11 +25,11 @@ public:
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
-    void Draw(Shader &shader);
+    void Draw(Shader &shader, unsigned int instances);
 
-private:
     //  render data
     unsigned int VAO, VBO, EBO;
 
+private:
     void setupMesh();
 };
