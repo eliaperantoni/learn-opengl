@@ -11,11 +11,11 @@ public:
         loadModel(path);
     }
 
-    void Draw(Shader &shader, unsigned int instances = 1);
+    void Draw(Shader &shader);
 
+private:
     // model data
     std::vector<Mesh> meshes;
-private:
     std::string directory;
     std::vector<Texture> textures_loaded;
 

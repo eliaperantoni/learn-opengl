@@ -6,7 +6,7 @@ class Shader {
 public:
     unsigned int ID;
 
-    Shader(const std::string &vertexPath, const std::string &fragmentPath, const std::string &geometryPath = "");
+    Shader(const std::string &vertexPath, const std::string &fragmentPath);
     ~Shader();
 
     void use() const;

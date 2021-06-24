@@ -36,7 +36,7 @@ void Mesh::setupMesh() {
     glBindVertexArray(0);
 }
 
-void Mesh::Draw(Shader &shader, unsigned int instances) {
+void Mesh::Draw(Shader &shader) {
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
     for (unsigned int i = 0; i < textures.size(); i++) {
@@ -56,12 +56,6 @@ void Mesh::Draw(Shader &shader, unsigned int instances) {
 
     // draw mesh
     glBindVertexArray(VAO);
-
-    if(instances > 1) {
-        glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, instances);
-    } else {
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-    }
-
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

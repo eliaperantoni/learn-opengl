@@ -6,9 +6,9 @@
 
 unsigned int TextureFromFile(const char *path, const std::string &directory);
 
-void Model::Draw(Shader &shader, unsigned int instances) {
+void Model::Draw(Shader &shader) {
     for (unsigned int i = 0; i < meshes.size(); i++)
-        meshes[i].Draw(shader, instances);
+        meshes[i].Draw(shader);
 }
 
 void Model::loadModel(std::string path) {
